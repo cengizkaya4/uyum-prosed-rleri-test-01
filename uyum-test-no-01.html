@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTT Uyum Birimi – Prosedür Sınavı (Gemini Theme)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&family=Space+Mono&display=swap');
+
+  :root {
+    /* Google / Gemini Dark Theme Colors */
+    --bg: #131314; 
+    --surface: #1e1f20;
+    --card: #282a2c;
+    --border: #444746;
+    --accent-blue: #a8c7fa;
+    --accent-purple: #c58af9;
+    --gemini-grad: linear-gradient(90deg, #4285f4, #9b72cb, #d96570, #fbbc04);
+    --gemini-grad-subtle: linear-gradient(90deg, rgba(66,133,244,0.1), rgba(155,114,203,0.1));
+    --danger: #f28b82;
+    --success: #81c995;
+    --text: #e3e3e3;
+    --muted: #c4c7c5;
+    --ptt-red: #ea4335; /* Google Red for PTT Badge */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtly animated gradient background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(155, 114, 203, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 20px; }
+
+  /* ===== COVER ===== */
+  #cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .ptt-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 20px;
+    border-radius: 999px; /* Material 3 Pill */
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+
+  .ptt-badge::before {
+    content: '✦';
+    background: var(--gemini-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 16px;
+  }
+
+  .cover-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .cover-title span { 
+    background: var(--gemini-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cover-subtitle {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 50px;
+  }
+
+  .meta-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 16px 32px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  }
+
+  .meta-item .num {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    color: var(--accent-blue);
+    line-height: 1;
+  }
+
+  .meta-item .lbl {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  .start-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .start-btn::after {
+    content: '✨';
+  }
+
+  .start-btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 24px rgba(168, 199, 250, 0.2); 
+    background: var(--accent-blue);
+    color: var(--bg);
+  }
+
+  /* ===== QUIZ ===== */
+  #quiz { display: none; }
+
+  .progress-bar-wrap {
+    background: var(--surface);
+    height: 6px;
+    border-radius: 999px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gemini-grad);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .q-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .q-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .q-type-badge {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 999px;
+  }
+
+  .badge-single { background: rgba(168,199,250,0.1); color: var(--accent-blue); border: 1px solid rgba(168,199,250,0.2); }
+  .badge-negative { background: rgba(242,139,130,0.1); color: var(--danger); border: 1px solid rgba(242,139,130,0.2); }
+  .badge-multi { background: rgba(129,201,149,0.1); color: var(--success); border: 1px solid rgba(129,201,149,0.2); }
+  .badge-best { background: var(--gemini-grad-subtle); color: var(--accent-purple); border: 1px solid rgba(197,138,249,0.3); }
+  .badge-match { background: rgba(251,188,4,0.1); color: #fbbc04; border: 1px solid rgba(251,188,4,0.2); }
+  .badge-quant { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 36px;
+    margin-bottom: 24px;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+
+  .q-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .q-text strong { 
+    color: var(--accent-blue); 
+    font-weight: 600; 
+  }
+
+  .q-hint {
+    background: var(--card);
+    border-left: 4px solid var(--accent-purple);
+    padding: 12px 16px;
+    border-radius: 0 12px 12px 0;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 12px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--card);
+  }
+
+  .option:hover:not(.locked) {
+    border-color: var(--accent-blue);
+    background: rgba(168,199,250,0.04);
+  }
+
+  .option.selected:not(.locked) {
+    border-color: var(--accent-blue);
+    background: rgba(168,199,250,0.08);
+  }
+
+  .option.correct { border-color: var(--success) !important; background: rgba(129,201,149,0.1) !important; }
+  .option.wrong { border-color: var(--danger) !important; background: rgba(242,139,130,0.1) !important; }
+  .option.reveal-correct { border-color: var(--success) !important; background: rgba(129,201,149,0.05) !important; }
+
+  .opt-letter {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+
+  .option.selected:not(.locked) .opt-letter { background: var(--accent-blue); color: var(--bg); border-color: var(--accent-blue); }
+  .option.correct .opt-letter { background: var(--success); color: var(--bg); border-color: var(--success); }
+  .option.wrong .opt-letter { background: var(--danger); color: var(--bg); border-color: var(--danger); }
+
+  .opt-text { font-size: 16px; line-height: 1.5; color: var(--text); }
+
+  /* Checkbox for multi */
+  .opt-check {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .option.selected:not(.locked) .opt-check {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+
+  .option.correct .opt-check { background: var(--success); border-color: var(--success); }
+  .option.wrong .opt-check { background: var(--danger); border-color: var(--danger); }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--gemini-grad);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .submit-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(0.99); }
+  .submit-btn:disabled { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: not-allowed; }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: rgba(129,201,149,0.05); border: 1px solid rgba(129,201,149,0.2); }
+  .feedback.wrong-fb { background: rgba(242,139,130,0.05); border: 1px solid rgba(242,139,130,0.2); }
+
+  .fb-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fb-title.ok { color: var(--success); }
+  .fb-title.nope { color: var(--danger); }
+
+  .fb-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .fb-text strong { color: var(--accent-blue); }
+
+  .next-btn {
+    margin-top: 20px;
+    padding: 12px 32px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    float: right;
+  }
+
+  .next-btn:hover { background: var(--accent-blue); }
+
+  /* Matching */
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .match-col-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .match-item {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    background: var(--card);
+    line-height: 1.5;
+  }
+
+  .match-item strong { color: var(--accent-purple); }
+
+  .match-select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin-top: 10px;
+    cursor: pointer;
+    appearance: none;
+  }
+
+  .match-select:focus { outline: none; border-color: var(--accent-purple); }
+
+  /* ===== RESULT ===== */
+  #result { display: none; padding: 40px 0; }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 48px;
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  }
+
+  .score-ring {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-num {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 48px;
+    background: var(--gemini-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+
+  .score-denom { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--muted); margin-top: 4px;}
+
+  .result-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .result-subtitle { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+
+  .result-stats {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px 28px;
+    min-width: 120px;
+  }
+
+  .stat-box .n { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 32px; }
+  .stat-box .l { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; font-weight: 500;}
+  .stat-box.c .n { color: var(--success); }
+  .stat-box.w .n { color: var(--danger); }
+  .stat-box.p .n { color: var(--accent-purple); }
+
+  /* Answer review */
+  .review-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    margin-bottom: 24px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .review-title::before { content: '✨'; }
+
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+    border-left: 6px solid var(--border);
+    animation: fadeIn 0.4s ease;
+  }
+
+  .review-item.rev-correct { border-left-color: var(--success); }
+  .review-item.rev-wrong { border-left-color: var(--danger); }
+
+  .rev-q { color: var(--muted); margin-bottom: 12px; font-family: 'Space Mono', monospace; font-size: 12px; background: var(--card); display: inline-block; padding: 4px 12px; border-radius: 999px;}
+  .rev-qtext { font-family: 'Outfit', sans-serif; font-size: 16px; margin-bottom: 16px; line-height: 1.5; }
+  .rev-ans { font-size: 14px; background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border);}
+  .rev-your { color: var(--danger); font-weight: 500;}
+  .rev-your.ok { color: var(--success); }
+  .rev-correct-ans { color: var(--success); margin-top: 8px; font-weight: 500;}
+  .rev-explain { margin-top: 16px; font-size: 14px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px; }
+  .rev-explain strong { color: var(--accent-blue); font-weight: 600;}
+
+  .restart-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 32px;
+    transition: all 0.3s ease;
+  }
+
+  .restart-btn:hover { background: var(--accent-blue); transform: translateY(-2px); }
+
+  /* Utility */
+  .clearfix::after { content: ''; display: table; clear: both; }
+</style>
+</head>
+<body>
+
+<div id="cover">
+  <div class="container">
+    <div class="ptt-badge">PTT AŞ — UYUM BİRİMİ</div>
+    <div class="cover-title">PROSEDÜR <span>SINAVI</span></div>
+    <div class="cover-subtitle">UYB.PR01 · UYB.PR02 · UYB.PR03 · UYB.PR04 · UYB.PR05</div>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <div class="num">18</div>
+        <div class="lbl">SORU</div>
+      </div>
+      <div class="meta-item">
+        <div class="num">6</div>
+        <div class="lbl">SORU TİPİ</div>
+      </div>
+      <div class="meta-item">
+        <div class="num">5</div>
+        <div class="lbl">PROSEDÜR</div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Sınava Başla</button>
+  </div>
+</div>
+
+<div id="quiz">
+  <div class="container">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div id="questionArea"></div>
+  </div>
+</div>
+
+<div id="result">
+  <div class="container">
+    <div class="result-card">
+      <div class="score-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--card)" stroke-width="12"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="url(#grad)" stroke-width="12"
+            stroke-linecap="round" id="scoreArc" stroke-dasharray="440" stroke-dashoffset="440"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#4285f4"/>
+              <stop offset="50%" stop-color="#9b72cb"/>
+              <stop offset="100%" stop-color="#d96570"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="score-center">
+          <div class="score-num" id="scoreNum">0</div>
+          <div class="score-denom" id="scoreDenom">/18</div>
+        </div>
+      </div>
+      <div class="result-title" id="resultTitle">SONUÇ</div>
+      <div class="result-subtitle" id="resultSubtitle"></div>
+      <div class="result-stats">
+        <div class="stat-box c"><div class="n" id="statCorrect">0</div><div class="l">DOĞRU</div></div>
+        <div class="stat-box w"><div class="n" id="statWrong">0</div><div class="l">YANLIŞ</div></div>
+        <div class="stat-box p"><div class="n" id="statPct">0%</div><div class="l">BAŞARI</div></div>
+      </div>
+    </div>
+
+    <div class="review-title">Cevap Anahtarı ve Açıklamalar</div>
+    <div id="reviewList"></div>
+    <button class="restart-btn" onclick="restartQuiz()">Yeniden Başla</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // Q1 - Tek doğru (İç Denetim)
+  {
+    id: 1,
+    type: 'single',
+    typeName: 'TEK DOĞRU CEVAP',
+    badgeClass: 'badge-single',
+    prosedur: 'UYB.PR01',
+    text: 'İç Denetim Prosedürü\'ne göre, iç denetim faaliyetleri hangi yaklaşım ve sıklıkla gerçekleştirilir?',
+    options: [
+      { letter: 'A', text: 'Aylık olarak ve örnekleme temelli bir yaklaşımla' },
+      { letter: 'B', text: 'Yıllık olarak ve risk temelli bir yaklaşımla' },
+      { letter: 'C', text: 'Yıllık olarak ve rastgele örnekleme yöntemiyle' },
+      { letter: 'D', text: 'Altı ayda bir ve müşteri şikâyeti odaklı bir yaklaşımla' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR01 Madde 1\'de açıkça belirtildiği üzere iç denetim; <strong>yıllık olarak ve risk temelli bir yaklaşımla</strong> gerçekleştirilir. Bu iki unsur birlikte doğru cevabı oluşturur; yalnızca biri yeterli değildir.'
+  },
+
+  // Q2 - Olumsuz köklü (İç Denetim)
+  {
+    id: 2,
+    type: 'negative',
+    typeName: 'OLUMSUZ KÖKLÜ',
+    badgeClass: 'badge-negative',
+    prosedur: 'UYB.PR01',
+    text: 'İç Denetim Prosedürü\'ne göre, denetim kapsamı <strong>belirlenirken</strong> aşağıdakilerden hangisi <strong>dikkate alınmaz?</strong>',
+    options: [
+      { letter: 'A', text: 'İzleme ve kontrol çalışmalarında tespit edilen aksaklıklar' },
+      { letter: 'B', text: 'Riskli müşteriler, hizmetler ve işlemler' },
+      { letter: 'C', text: 'PTT AŞ işletme büyüklüğü ve işlem hacmi' },
+      { letter: 'D', text: 'Denetim birimlerinin bir önceki yılda almış oldukları disiplin cezaları' },
+    ],
+    correct: ['D'],
+    explanation: 'UYB.PR01 Madde 6.4 ve 6.5\'e göre denetim kapsamını belirlerken; aksaklıklar, riskli müşteri/hizmet/işlemler (A,B) ve işletme büyüklüğü/işlem hacmi (C) dikkate alınır. <strong>Disiplin cezaları</strong> prosedürde kapsam kriteri olarak yer almamaktadır.'
+  },
+
+  // Q3 - Nicel / Tek doğru (İç Denetim – Şubat bildirimi)
+  {
+    id: 3,
+    type: 'quant',
+    typeName: 'NİCEL ANALİZ',
+    badgeClass: 'badge-quant',
+    prosedur: 'UYB.PR01',
+    text: 'Denetim birimleri tarafından gerçekleştirilen iç denetim faaliyetine ilişkin bilgiler <strong>en geç ne zamana kadar</strong> Uyum Birimine gönderilmelidir?',
+    options: [
+      { letter: 'A', text: 'Takip eden yılın Ocak ayı sonuna kadar' },
+      { letter: 'B', text: 'Takip eden yılın Şubat ayı sonuna kadar' },
+      { letter: 'C', text: 'Takip eden yılın Mart ayı sonuna kadar' },
+      { letter: 'D', text: 'Aynı yılın Aralık ayı sonuna kadar' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR01 Madde 6.7\'de açıkça belirtilmiştir: <strong>Takip eden yılın Şubat ayı sonuna kadar</strong> Uyum Birimine gönderilir. Mart ayı ise eğitim istatistiklerinin MASAK\'a gönderim tarihidir (UYB.PR04); karıştırılmamalıdır.'
+  },
+
+  // Q4 - En uygun cevap (İzleme ve Kontrol)
+  {
+    id: 4,
+    type: 'best',
+    typeName: 'EN UYGUN CEVAP',
+    badgeClass: 'badge-best',
+    prosedur: 'UYB.PR02',
+    text: 'PTT iş yerinde gişe personelinin yaptığı iş ve işlemlerin kimlik kontrolü ve işlem tutarları yönünden mevzuata uygunluğunun kontrolü kimin tarafından ve ne zaman yapılır?',
+    options: [
+      { letter: 'A', text: 'Uyum Birimi tarafından haftalık periyotlarla yapılır.' },
+      { letter: 'B', text: 'PTT iş yerlerinde görevli şef ya da müdürler tarafından gün sonunda yapılır.' },
+      { letter: 'C', text: 'Denetim birimleri tarafından aylık periyotlarla yapılır.' },
+      { letter: 'D', text: 'Uyum Görevlisi tarafından ani denetim şeklinde yapılır.' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR02 Madde 6.1/(ç) uyarınca; gişe personelinin işlemleri <strong>gün sonunda PTT iş yerlerinde görevli şef ya da müdürler</strong> tarafından kimlik kontrolü ve işlem tutarları yönünden denetlenir. Bu günlük ve sahada gerçekleştirilen bir kontrol mekanizmasıdır.'
+  },
+
+  // Q5 - Çoklu birleşik (İzleme ve Kontrol)
+  {
+    id: 5,
+    type: 'multi',
+    typeName: 'ÇOKLU BİRLEŞİK',
+    badgeClass: 'badge-multi',
+    hint: 'Birden fazla seçenek doğru olabilir. Doğru olduğunu düşündüğünüz tüm seçenekleri işaretleyin.',
+    prosedur: 'UYB.PR02',
+    text: 'İzleme ve Kontrol Prosedürü\'ne göre aşağıdaki ifadelerden hangileri <strong>doğrudur?</strong><br><br><em>I. Sürekli iş ilişkisi kapsamında müşteri işlemleri devamlı olarak izlenir ve bilgiler güncel tutulur.<br>II. Yüz yüze olmayan işlemler izleme ve kontrol kapsamı dışındadır.<br>III. Yeni sunulan ürünler ve teknolojik gelişmeler nedeniyle suistimale açık hizmetler risk odaklı kontrole tabidir.<br>IV. Örnekleme yöntemi yalnızca yüksek riskli müşterilere uygulanır.</em>',
+    options: [
+      { letter: 'A', text: 'Yalnızca I ve III' },
+      { letter: 'B', text: 'I, II ve III' },
+      { letter: 'C', text: 'Yalnızca I, III ve IV' },
+      { letter: 'D', text: 'I ve IV' },
+    ],
+    correct: ['A'],
+    explanation: '<strong>I. Doğru</strong> – UYB.PR02 Madde 6.1(a) ve 6.2(f). <strong>II. Yanlış</strong> – Madde 6.2(g) yüz yüze olmayan işlemler açıkça kontrol kapsamındadır. <strong>III. Doğru</strong> – Madde 6.2(ğ). <strong>IV. Yanlış</strong> – Madde 6.2(ç); örnekleme yöntemi <em>risk politikasına göre belirlenen tutarın üzerindeki işlemlere</em> uygulanır, yalnızca yüksek riskli müşterilere değil.'
+  },
+
+  // Q6 - Tek doğru (İzleme ve Kontrol – hesap kapatma)
+  {
+    id: 6,
+    type: 'single',
+    typeName: 'TEK DOĞRU CEVAP',
+    badgeClass: 'badge-single',
+    prosedur: 'UYB.PR02',
+    text: 'PBD.PR01 Posta Çeki ve Havale İşlemleri Uygulama Prosedürü\'ne göre; hesabın <em>ahlak ve genel adaba aykırı, güvenliği bozucu ve millî ekonomiye zarar verici</em> amaçlarla kullanıldığı <strong>resmî mercilerce karar altına alınması durumunda</strong> ne yapılır?',
+    options: [
+      { letter: 'A', text: 'Hesap 30 gün süre verilerek uyarı sonrası kapatılır.' },
+      { letter: 'B', text: 'Durum MASAK\'a bildirilerek MASAK\'ın onayı beklenir.' },
+      { letter: 'C', text: 'Hesabın doğrudan kapatılması için gerekli önlemler alınır.' },
+      { letter: 'D', text: 'Hesap dondurulur ve müşteriye yazılı bildirim yapılır.' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR02 Madde 6.1(e) uyarınca; resmi mercilerin karar alması durumunda <strong>hesabın doğrudan kapatılması için gerekli önlemler alınır</strong>. Herhangi bir süre bekleme, uyarı ya da MASAK onayı aşaması öngörülmemektedir.'
+  },
+
+  // Q7 – Senaryo belirleme kriterleri (İzleme ve Kontrol)
+  {
+    id: 7,
+    type: 'negative',
+    typeName: 'OLUMSUZ KÖKLÜ',
+    badgeClass: 'badge-negative',
+    prosedur: 'UYB.PR02',
+    text: 'İzleme ve kontrol senaryoları belirlenirken aşağıdakilerden hangisi <strong>göz önünde bulundurulmaz?</strong>',
+    options: [
+      { letter: 'A', text: 'İşlemin tutarı ve sıklığı' },
+      { letter: 'B', text: 'Yeni açılmış posta çeki hesaplarına ait işlemler' },
+      { letter: 'C', text: 'Müşterinin medeni hali ve eğitim durumu' },
+      { letter: 'D', text: 'Ulusal ve uluslararası mercilerce riskli kabul edilen ülkelere yapılan işlemler' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR02 Madde 6.3\'te senaryo belirleme kriterleri sayılmıştır: Uyum Birimi\'nin belirlediği riskler, müşteri profili, işlem tipi, kanal, tutar ve sıklık, riskli ülkeler, yeni posta çeki hesapları, kara listeler. <strong>Medeni hal ve eğitim durumu</strong> senaryo kriteri olarak yer almaz.'
+  },
+
+  // Q8 - Risk azaltma tedbirleri eşleştirme
+  {
+    id: 8,
+    type: 'match',
+    typeName: 'EŞLEŞTİRME',
+    badgeClass: 'badge-match',
+    prosedur: 'UYB.PR03',
+    text: 'Risk Yönetimi Prosedürü\'ne (UYB.PR03) göre, risklerin azaltılması için Kanun kapsamında uygulanan <strong>üç tedbir türünü</strong> doğru uygulayıcısıyla eşleştirin.',
+    matchItems: [
+      { id: 'ma', label: 'A', text: 'Farkındalık Yaratıcı Tedbir' },
+      { id: 'mb', label: 'B', text: 'Önleyici Tedbir' },
+      { id: 'mc', label: 'C', text: 'Tespit Edici Tedbir' },
+    ],
+    matchOptions: ['Eğitim birimi tarafından personele eğitim verilmesi', 'Denetim birimleri tarafından denetleme yapılması', 'İlgili birimler tarafından tebliğ yapılması'],
+    correctMatch: {
+      'ma': 'Eğitim birimi tarafından personele eğitim verilmesi',
+      'mb': 'İlgili birimler tarafından tebliğ yapılması',
+      'mc': 'Denetim birimleri tarafından denetleme yapılması',
+    },
+    explanation: 'UYB.PR03 Madde 6.4.2 uyarınca: <strong>A – Farkındalık Yaratıcı Tedbir:</strong> PTT personeline eğitim birimi tarafından eğitim verilmesi. <strong>B – Önleyici Tedbir:</strong> İlgili birimler tarafından tebliğ yapılması. <strong>C – Tespit Edici Tedbir:</strong> Denetim birimleri tarafından denetleme yapılması.'
+  },
+
+  // Q9 - Nicel (Risk – iç düzenlemelerin gözden geçirilmesi)
+  {
+    id: 9,
+    type: 'quant',
+    typeName: 'NİCEL ANALİZ',
+    badgeClass: 'badge-quant',
+    prosedur: 'UYB.PR03',
+    text: 'Risk Yönetimi Prosedürü\'ne göre, iç düzenlemeler mevzuat değişikliğinden bağımsız olarak <strong>en az ne sıklıkla</strong> gözden geçirilmelidir?',
+    options: [
+      { letter: 'A', text: 'En az iki yılda bir' },
+      { letter: 'B', text: 'En az altı ayda bir' },
+      { letter: 'C', text: 'En az yılda bir kez' },
+      { letter: 'D', text: 'Her mevzuat değişikliğinde' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR03 Madde 6.2.1(ğ) uyarınca: <strong>"İç düzenlemelerin mevzuat değişikliğinden bağımsız en az yılda bir kez gözden geçirilmesi"</strong> gerekmektedir. Bu, mevzuatta değişiklik olmasa bile yıllık gözden geçirmenin zorunlu olduğunu ortaya koymaktadır.'
+  },
+
+  // Q10 - Çoklu birleşik (Risk – sıkılaştırılmış tedbirler)
+  {
+    id: 10,
+    type: 'multi',
+    typeName: 'ÇOKLU BİRLEŞİK',
+    badgeClass: 'badge-multi',
+    hint: 'Birden fazla seçenek doğru olabilir.',
+    prosedur: 'UYB.PR03',
+    text: 'Risk analizinde <strong>yüksek/çok yüksek risk</strong> derecesine sahip gruplara yönelik uygulanacak sıkılaştırılmış tedbirler arasında aşağıdakilerden hangileri yer almaktadır?<br><br><em>I. Müşteri kimlik bilgilerini daha sık güncellemek<br>II. İş ilişkisine girilmesini üst seviyedeki görevlinin onayına bağlamak<br>III. Müşteriyle iş ilişkisini derhal sonlandırmak<br>IV. Sürekli iş ilişkisi tesisinde ilk finansal hareketin başka bir finansal kuruluştan yapılmasını zorunlu tutmak</em>',
+    options: [
+      { letter: 'A', text: 'I, II ve III' },
+      { letter: 'B', text: 'I, II ve IV' },
+      { letter: 'C', text: 'Yalnızca II ve III' },
+      { letter: 'D', text: 'I, III ve IV' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR03 Madde 6.4.3 kapsamındaki sıkılaştırılmış tedbirler arasında: <strong>I ✓</strong> (kimlik bilgilerini daha sık güncelleme), <strong>II ✓</strong> (üst yönetici onayı), <strong>IV ✓</strong> (ilk finansal hareketin başka kuruluştan yapılması zorunluluğu) yer almaktadır. <strong>III Yanlış</strong>: İş ilişkisinin "derhal sonlandırılması" bu maddede bir tedbir olarak öngörülmemiştir.'
+  },
+
+  // Q11 - Tablo/matris (Uyum Programı – 6 tedbir)
+  {
+    id: 11,
+    type: 'best',
+    typeName: 'EN UYGUN CEVAP',
+    badgeClass: 'badge-best',
+    prosedur: 'UYB.PR04',
+    text: 'Uyum Programı\'na (UYB.PR04) göre, risk temelli yaklaşımla oluşturulan uyum programının içermesi gereken tedbirler aşağıda listelenmiştir. <strong>Eksik olan tedbir</strong> hangisidir?<br><br><em>✓ Kurum politikası ve prosedürlerinin oluşturulması<br>✓ Risk yönetimi faaliyetlerinin yürütülmesi<br>✓ İzleme ve kontrol faaliyetlerinin yürütülmesi<br>✓ Uyum Görevlisi atanması ve Uyum Birimi oluşturulması<br>✓ İç denetim faaliyetlerinin yürütülmesi<br>❓ ???</em>',
+    options: [
+      { letter: 'A', text: 'Şüpheli işlem bildirimi faaliyetlerinin yürütülmesi' },
+      { letter: 'B', text: 'Müşteri durum tespiti faaliyetlerinin yürütülmesi' },
+      { letter: 'C', text: 'Eğitim faaliyetlerinin yürütülmesi' },
+      { letter: 'D', text: 'Mal varlığı dondurma faaliyetlerinin yürütülmesi' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR04 Madde 6.1.1\'e göre uyum programının 6 tedbiri: (a) Kurum politikası ve prosedürleri, (b) Risk yönetimi, (c) İzleme ve kontrol, (ç) Uyum Görevlisi/Birimi oluşturulması, <strong>(d) Eğitim faaliyetleri</strong>, (e) İç denetim. Eksik olan tedbir <strong>eğitim faaliyetlerinin yürütülmesidir</strong>.'
+  },
+
+  // Q12 – Nicel (Uyum Programı – 2 yılda bir, 30 gün süreleri)
+  {
+    id: 12,
+    type: 'quant',
+    typeName: 'NİCEL ANALİZ',
+    badgeClass: 'badge-quant',
+    prosedur: 'UYB.PR04',
+    text: 'Uyum Programı kapsamında aşağıda verilen <strong>süre–işlem eşleştirmelerinden</strong> hangisi <strong>yanlıştır?</strong>',
+    options: [
+      { letter: 'A', text: 'Uyum Görevlisi atandıktan sonra kurum politikası en geç 30 gün içinde oluşturulur.' },
+      { letter: 'B', text: 'Uyum Görevlisi\'nin görevden ayrılması 10 gün içinde MASAK\'a yazılı bildirilir.' },
+      { letter: 'C', text: 'Kurum politikasının değişmesi halinde 30 gün içinde MASAK\'a gönderilir.' },
+      { letter: 'D', text: 'Uyum programının 1. ve 3. fıkra tedbirleri en az yılda bir gözden geçirilir.' },
+    ],
+    correct: ['D'],
+    explanation: 'UYB.PR04 Madde 6.1.2 açıkça belirtir: Uyum programı kapsamında <strong>birinci ve üçüncü fıkralarda yer alan tedbirler asgari 2 (iki) yılda bir</strong> gözden geçirilir. "Yılda bir" ifadesi yanlıştır. Diğer seçenekler (A, B, C) sırasıyla Madde 6.2.1, 6.6.1\'e göre doğrudur.'
+  },
+
+  // Q13 – Tek doğru (Uyum Programı – Yönetim Kurulu yetki devri)
+  {
+    id: 13,
+    type: 'single',
+    typeName: 'TEK DOĞRU CEVAP',
+    badgeClass: 'badge-single',
+    prosedur: 'UYB.PR04',
+    text: 'Yönetim Kurulu, uyum programı kapsamındaki yetkilerini Türkiye\'de mukim bir veya birden fazla Yönetim Kurulu üyesine devredebilir. Bu konuda aşağıdaki ifadelerden hangisi <strong>doğrudur?</strong>',
+    options: [
+      { letter: 'A', text: 'Yetki devri yapıldığında Yönetim Kurulu\'nun sorumluluğu ortadan kalkar.' },
+      { letter: 'B', text: 'Yetki devri sözlü olarak da gerçekleştirilebilir.' },
+      { letter: 'C', text: 'Yetki devri açık bir şekilde ve yazılı olarak yapılır; bu devir Yönetim Kurulu\'nun sorumluluğunu ortadan kaldırmaz.' },
+      { letter: 'D', text: 'Yetki yalnızca tek bir Yönetim Kurulu üyesine devredilebilir.' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR04 Madde 5.1.2: <strong>"Yönetim Kurulu, uyum programı kapsamındaki yetkilerinin bir kısmını veya tamamını Türkiye\'de mukim bir veya birden fazla Yönetim Kurulu üyesine (açık bir şekilde ve yazılı olarak) devredebilir. Söz konusu yetki devrinin yapılması, Yönetim Kurulunun bu konudaki sorumluluğunu ortadan kaldırmaz."</strong>'
+  },
+
+  // Q14 – Olumsuz köklü (Uyum Görevlisi'nin yapamayacakları)
+  {
+    id: 14,
+    type: 'negative',
+    typeName: 'OLUMSUZ KÖKLÜ',
+    badgeClass: 'badge-negative',
+    prosedur: 'UYB.PR04',
+    text: 'Uyum Programı\'na göre, Uyum Görevlisi\'nin üstlenemeyeceği görevler konusunda aşağıdaki ifadelerden hangisi <strong>doğrudur?</strong>',
+    options: [
+      { letter: 'A', text: 'Uyum Görevlisi hiçbir ek görev üstlenemez.' },
+      { letter: 'B', text: 'Uyum Görevlisi, satış ve pazarlamayla ilgili görevler dışında uyum programını aksatmayacak diğer görevleri yürütebilir.' },
+      { letter: 'C', text: 'Uyum Görevlisi, iç denetim görevi de yürütebilir.' },
+      { letter: 'D', text: 'Uyum Görevlisi, yalnızca Yönetim Kurulu\'nun yazılı onayıyla ek görev alabilir.' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR04 Madde 6.5.1 uyarınca: <strong>"Uyum Görevlisinin uhdesinde satış ve pazarlamayla ilgili olmamak şartıyla, uyum programının yürütülmesini aksatmayacak diğer görevler bulunabilir."</strong> Satış ve pazarlama görevi kesin olarak yasaktır; diğer görevler ise belirtilen koşullarda mümkündür.'
+  },
+
+  // Q15 – Nicel (Uyum Programı – eğitim istatistikleri Mart)
+  {
+    id: 15,
+    type: 'quant',
+    typeName: 'NİCEL ANALİZ',
+    badgeClass: 'badge-quant',
+    prosedur: 'UYB.PR04',
+    text: 'Eğitim faaliyetlerine ilişkin istatistiki bilgiler önce eğitim birimi tarafından Uyum Birimine iletilir. Ardından bu bilgiler Uyum Görevlisi tarafından MASAK\'a <strong>en geç ne zaman</strong> bildirilir?',
+    options: [
+      { letter: 'A', text: 'Takip eden yılın Şubat ayı sonuna kadar' },
+      { letter: 'B', text: 'Aynı yıl içinde Aralık sonuna kadar' },
+      { letter: 'C', text: 'Takip eden yılın Mart ayı sonuna kadar' },
+      { letter: 'D', text: 'Takip eden yılın Nisan ayı sonuna kadar' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR04 Madde 6.7.3 uyarınca eğitim istatistikleri <strong>takip eden yılın Mart ayı sonuna kadar</strong> Uyum Görevlisi tarafından MASAK\'a bildirilir. <em>Şubat</em> ise iç denetim faaliyetine ilişkin bilgilerin Uyum Birimine gönderim tarihidir (UYB.PR01 Madde 6.7); ikisi sıkça karıştırılmaktadır.'
+  },
+
+  // Q16 – Tek doğru (Mal Varlığı Dondurma – günlük takip)
+  {
+    id: 16,
+    type: 'single',
+    typeName: 'TEK DOĞRU CEVAP',
+    badgeClass: 'badge-single',
+    prosedur: 'UYB.PR05',
+    text: 'Mal Varlığı Dondurma Prosedürü\'ne göre, mal varlığı dondurulması kararları Uyum Birimi tarafından nasıl takip edilir ve bu karar Pttbank Daire Başkanlığına <strong>ne zaman</strong> bildirilir?',
+    options: [
+      { letter: 'A', text: 'Haftalık olarak MASAK sistemi üzerinden takip edilir; haftalık bildirim yapılır.' },
+      { letter: 'B', text: 'Günlük olarak Resmî Gazete üzerinden takip edilir; kararın yayımlandığı gün bildirilir.' },
+      { letter: 'C', text: 'Aylık olarak MASAK\'ın gönderdiği liste üzerinden takip edilir; ay sonunda bildirilir.' },
+      { letter: 'D', text: 'Günlük olarak Kara Liste Programı üzerinden takip edilir; 3 iş günü içinde bildirilir.' },
+    ],
+    correct: ['B'],
+    explanation: 'UYB.PR05 Madde 6.1 ve 6.2: <strong>"Mal varlığı dondurulması kararları Uyum Birimi tarafından günlük olarak Resmî Gazete üzerinden takip edilir."</strong> Ve <strong>"Uyum Birimi mal varlığının dondurulması kararının Resmî Gazetede yayımlandığı gün kararın icrası için Pttbank Daire Başkanlığına bildirimde bulunur."</strong>'
+  },
+
+  // Q17 – Olumsuz köklü (Mal Varlığı – istisnalar)
+  {
+    id: 17,
+    type: 'negative',
+    typeName: 'OLUMSUZ KÖKLÜ',
+    badgeClass: 'badge-negative',
+    prosedur: 'UYB.PR05',
+    text: 'Mal varlığı dondurulması kararı verilen kişilerin PTT AŞ nezdinde işlem yapması kural olarak yasaktır. Aşağıdakilerden hangisi bu yasağın <strong>istisnası değildir?</strong>',
+    options: [
+      { letter: 'A', text: 'MASAK tarafından izin verilmesi halinde, izin belgesinde yazılı hükümler ölçüsünde para çıkışına izin verilmesi' },
+      { letter: 'B', text: 'İlgili kişilerin adına ve hesabına gelen mal varlığı değerlerinin girişine izin verilmesi' },
+      { letter: 'C', text: 'Kişinin talep etmesi halinde emekli maaşı ödemesinin yapılması' },
+      { letter: 'D', text: 'Hem A hem B seçeneğinde belirtilen durumlar' },
+    ],
+    correct: ['C'],
+    explanation: 'UYB.PR05 Madde 6.8 ve 6.9: Yasak kapsamına <strong>emekli maaşı ödemesi, sosyal yardım ödemesi dahil her türlü ödeme</strong> girmektedir. İstisnalar yalnızca; (1) MASAK izniyle para çıkışı ve (2) kişi adına gelen değerlerin girişidir. Dolayısıyla kişinin talebine dayanarak emekli maaşı ödemesi yapılması bir istisna değil, yasak kapsamındadır.'
+  },
+
+  // Q18 – Çoklu birleşik (Mal Varlığı – mal varlığı artışı ve geri alma)
+  {
+    id: 18,
+    type: 'multi',
+    typeName: 'ÇOKLU BİRLEŞİK',
+    badgeClass: 'badge-multi',
+    hint: 'Birden fazla seçenek doğru olabilir.',
+    prosedur: 'UYB.PR05',
+    text: 'Mal Varlığı Dondurma Prosedürü\'ne göre aşağıdaki ifadelerden hangileri <strong>doğrudur?</strong><br><br><em>I. Mal varlığı dondurulması kararı verilen kişinin PTT AŞ nezdindeki mal varlığında artış meydana gelmesi halinde bu durum Uyum Birimi tarafından MASAK\'a bildirilir.<br>II. Resmi kurumlar, MASAK izni olmaksızın mal varlığı değerini resen geri alabilir.<br>III. Olası mal varlığı artışları vakit kaybetmeksizin işlemi yapan personel tarafından MASAK\'a bildirilmek üzere Uyum Birimine iletilir.<br>IV. Tereddütlü hallerde personel kendi inisiyatifiyle hareket eder.</em>',
+    options: [
+      { letter: 'A', text: 'Yalnızca I ve II' },
+      { letter: 'B', text: 'Yalnızca I ve III' },
+      { letter: 'C', text: 'I, II ve III' },
+      { letter: 'D', text: 'I, III ve IV' },
+    ],
+    correct: ['B'],
+    explanation: '<strong>I. Doğru</strong> – Madde 6.11. <strong>II. Yanlış</strong> – Madde 6.11: <em>"Resmi kurumlar da dahil olmak üzere, mal varlığının dondurulması kararı verilen kişiye ait mal varlığı değeri, MASAK tarafından izin verilmedikçe resen geri alınamaz."</em> <strong>III. Doğru</strong> – Madde 6.10. <strong>IV. Yanlış</strong> – Madde 6.12: Tereddütlü hallerde <em>Uyum Birimi ile iletişime geçilerek Uyum Birimi\'nin bildirimine göre hareket edilir</em>.'
+  },
+];
+
+let currentQ = 0;
+let userAnswers = [];
+let score = 0;
+let matchAnswers = {};
+
+function startQuiz() {
+  document.getElementById('cover').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const pct = (currentQ / QUESTIONS.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  let html = `
+    <div class="q-header">
+      <span class="q-counter">Soru ${currentQ + 1} / ${QUESTIONS.length} &nbsp;·&nbsp; ${q.prosedur}</span>
+      <span class="q-type-badge ${q.badgeClass}">${q.typeName}</span>
+    </div>
+    <div class="q-card">
+      <div class="q-text">${q.text}</div>
+      ${q.hint ? `<div class="q-hint">✨ ${q.hint}</div>` : ''}
+  `;
+
+  if (q.type === 'match') {
+    matchAnswers = {};
+    q.matchItems.forEach(item => { matchAnswers[item.id] = ''; });
+
+    html += `<div class="match-grid">
+      <div>
+        <div class="match-col-title">TEDBİR TÜRÜ</div>`;
+    q.matchItems.forEach(item => {
+      html += `
+        <div class="match-item">
+          <strong>${item.label})</strong> ${item.text}
+          <select class="match-select" id="match_${item.id}" onchange="setMatch('${item.id}', this.value)">
+            <option value="">— Seçiniz —</option>
+            ${q.matchOptions.map(o => `<option value="${o}">${o}</option>`).join('')}
+          </select>
+        </div>`;
+    });
+    html += `</div>
+      <div>
+        <div class="match-col-title">UYGULAYICI</div>`;
+    q.matchOptions.forEach(opt => {
+      html += `<div class="match-item" style="background:rgba(168,199,250,0.05); border-color: rgba(168,199,250,0.2);">${opt}</div>`;
+    });
+    html += `</div></div>`;
+  } else {
+    html += `<div class="options">`;
+    q.options.forEach(opt => {
+      const checkEl = (q.type === 'multi')
+        ? `<div class="opt-check"></div>`
+        : `<div class="opt-letter">${opt.letter}</div>`;
+      html += `
+        <div class="option" id="opt_${opt.letter}" onclick="selectOption('${opt.letter}')">
+          ${checkEl}
+          <div class="opt-text">${opt.text}</div>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `
+      <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" ${q.type !== 'match' ? 'disabled' : ''}>
+        Cevabı Onayla
+      </button>
+      <div class="feedback" id="feedback">
+        <div class="fb-title" id="fbTitle"></div>
+        <div class="fb-text" id="fbText"></div>
+        <div class="clearfix">
+          <button class="next-btn" onclick="nextQuestion()">
+            ${currentQ < QUESTIONS.length - 1 ? 'Sonraki Soru →' : 'Sonuçları Gör →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('questionArea').innerHTML = html;
+}
+
+let selectedOptions = [];
+
+function selectOption(letter) {
+  const q = QUESTIONS[currentQ];
+  if (document.querySelector('.option.locked')) return;
+
+  if (q.type === 'multi') {
+    const idx = selectedOptions.indexOf(letter);
+    if (idx >= 0) {
+      selectedOptions.splice(idx, 1);
+      document.getElementById('opt_' + letter).classList.remove('selected');
+    } else {
+      selectedOptions.push(letter);
+      document.getElementById('opt_' + letter).classList.add('selected');
+    }
+  } else {
+    selectedOptions = [letter];
+    document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+    document.getElementById('opt_' + letter).classList.add('selected');
+  }
+
+  document.getElementById('submitBtn').disabled = selectedOptions.length === 0;
+}
+
+function setMatch(id, value) {
+  matchAnswers[id] = value;
+  const allFilled = Object.values(matchAnswers).every(v => v !== '');
+  document.getElementById('submitBtn').disabled = !allFilled;
+}
+
+function submitAnswer() {
+  const q = QUESTIONS[currentQ];
+  let isCorrect = false;
+
+  if (q.type === 'match') {
+    isCorrect = q.matchItems.every(item => matchAnswers[item.id] === q.correctMatch[item.id]);
+    // Lock selects
+    q.matchItems.forEach(item => {
+      const sel = document.getElementById('match_' + item.id);
+      sel.disabled = true;
+      const correct = q.correctMatch[item.id];
+      sel.parentElement.style.borderColor = matchAnswers[item.id] === correct ? 'var(--success)' : 'var(--danger)';
+    });
+    userAnswers.push({ q: currentQ, selected: matchAnswers, correct: isCorrect });
+  } else {
+    isCorrect = selectedOptions.length === q.correct.length &&
+      selectedOptions.every(s => q.correct.includes(s));
+
+    // Lock options
+    document.querySelectorAll('.option').forEach(el => el.classList.add('locked'));
+
+    q.options.forEach(opt => {
+      const el = document.getElementById('opt_' + opt.letter);
+      if (q.correct.includes(opt.letter)) {
+        if (selectedOptions.includes(opt.letter)) {
+          el.classList.add('correct');
+        } else {
+          el.classList.add('reveal-correct');
+        }
+      } else if (selectedOptions.includes(opt.letter)) {
+        el.classList.add('wrong');
+      }
+    });
+
+    userAnswers.push({ q: currentQ, selected: [...selectedOptions], correct: isCorrect });
+  }
+
+  if (isCorrect) score++;
+  selectedOptions = [];
+
+  // Show feedback
+  const fb = document.getElementById('feedback');
+  const fbTitle = document.getElementById('fbTitle');
+  const fbText = document.getElementById('fbText');
+  fb.classList.add('show');
+
+  if (isCorrect) {
+    fb.classList.add('correct-fb');
+    fbTitle.innerHTML = `<span>✨</span><span class="ok">Doğru Cevap!</span>`;
+  } else {
+    fb.classList.add('wrong-fb');
+    fbTitle.innerHTML = `<span>✖</span><span class="nope">Yanlış Cevap</span>`;
+  }
+
+  fbText.innerHTML = q.explanation;
+  document.getElementById('submitBtn').disabled = true;
+}
+
+function nextQuestion() {
+  selectedOptions = [];
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('progressBar');
+
+  const total = QUESTIONS.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreDenom').textContent = '/' + total;
+  document.getElementById('statCorrect').textContent = score;
+  document.getElementById('statWrong').textContent = total - score;
+  document.getElementById('statPct').textContent = pct + '%';
+
+  // Animate arc
+  const circumference = 440; // 2 * pi * r (70)
+  const offset = circumference - (pct / 100) * circumference;
+  setTimeout(() => {
+    document.getElementById('scoreArc').style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
+    document.getElementById('scoreArc').style.strokeDashoffset = offset;
+  }, 300);
+
+  let title, subtitle;
+  if (pct >= 90) { title = 'Mükemmel'; subtitle = 'Prosedürlere hâkimiyetiniz çok yüksek.'; }
+  else if (pct >= 75) { title = 'Başarılı'; subtitle = 'Prosedürleri genel olarak iyi kavramışsınız.'; }
+  else if (pct >= 60) { title = 'Orta Düzey'; subtitle = 'Bazı konuları pekiştirmeniz önerilir.'; }
+  else { title = 'Geliştirilmeli'; subtitle = 'Prosedürleri yeniden gözden geçirmeniz önerilir.'; }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSubtitle').textContent = subtitle;
+
+  // Build review
+  let reviewHtml = '';
+  QUESTIONS.forEach((q, i) => {
+    const ua = userAnswers[i];
+    const isOk = ua && ua.correct;
+    reviewHtml += `
+      <div class="review-item ${isOk ? 'rev-correct' : 'rev-wrong'}">
+        <div class="rev-q">Soru ${i + 1} · ${q.prosedur} · ${q.typeName}</div>
+        <div class="rev-qtext">${q.text.replace(/<[^>]+>/g, '').substring(0, 120)}${q.text.length > 120 ? '...' : ''}</div>
+        <div class="rev-ans">
+          <span class="${isOk ? 'rev-your ok' : 'rev-your'}">${isOk ? '✨ Doğru cevap verdiniz.' : '✖ Yanlış cevap verdiniz.'}</span>
+          ${!isOk && q.type !== 'match' ? `<div class="rev-correct-ans">✔ Doğru cevap: ${q.correct.join(', ')}</div>` : ''}
+          ${!isOk && q.type === 'match' ? `<div class="rev-correct-ans">✔ Doğru eşleşmeleri açıklamada görebilirsiniz.</div>` : ''}
+        </div>
+        <div class="rev-explain">${q.explanation}</div>
+      </div>
+    `;
+  });
+  document.getElementById('reviewList').innerHTML = reviewHtml;
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  score = 0;
+  userAnswers = [];
+  selectedOptions = [];
+  matchAnswers = {};
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('scoreArc').style.strokeDashoffset = '440';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+</script>
+</body>
+</html>
