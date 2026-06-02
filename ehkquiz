@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5809 Sayılı EHK – Yetkinlik Sınavı (22 Soru)</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #181c24;
+    --border: #252b38;
+    --accent: #00d4ff;
+    --accent2: #ff6b2b;
+    --correct: #00e676;
+    --wrong: #ff3d57;
+    --text: #e8eaf0;
+    --muted: #7a8299;
+    --gold: #ffd54f;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  /* GRID BG */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; }
+
+  /* ── INTRO ── */
+  #intro {
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(0,212,255,.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 18px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(56px, 10vw, 110px);
+    line-height: .9;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .hero-sub {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(20px, 4vw, 36px);
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .intro-stats {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px 28px;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 42px;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 18px 48px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .btn-start::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,.2);
+    transform: translateX(-100%);
+    transition: transform .3s;
+  }
+
+  .btn-start:hover::before { transform: translateX(0); }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,255,.4); }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz {
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .q-counter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .q-counter span { color: var(--accent); font-size: 20px; font-weight: 600; }
+
+  .progress-bar-wrap {
+    flex: 1; max-width: 400px;
+    height: 6px;
+    background: var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+
+  .score-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: rgba(0,230,118,.1);
+    border: 1px solid var(--correct);
+    color: var(--correct);
+    padding: 6px 16px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  /* QUESTION CARD */
+  .q-container {
+    max-width: 860px;
+    width: 100%;
+    margin: 48px auto;
+    padding: 0 24px 80px;
+  }
+
+  .q-type-tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+    background: rgba(255,107,43,.1);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+
+  .q-number {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 72px;
+    line-height: 1;
+    color: rgba(0,212,255,.15);
+    position: absolute;
+    right: 0; top: -10px;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn .4s ease;
+  }
+
+  .q-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-text {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 32px;
+    font-weight: 400;
+  }
+
+  .q-text strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* CHOICES */
+  .choices { display: flex; flex-direction: column; gap: 12px; }
+
+  .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .choice::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .choice:hover { border-color: var(--accent); }
+  .choice:hover::after { opacity: .06; }
+
+  .choice-letter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 24px;
+    margin-top: 1px;
+    transition: color .2s;
+    position: relative; z-index: 1;
+  }
+
+  .choice-text {
+    font-size: 15px;
+    line-height: 1.5;
+    position: relative; z-index: 1;
+    transition: color .2s;
+  }
+
+  /* States */
+  .choice.selected { border-color: var(--accent); background: rgba(0,212,255,.08); }
+  .choice.selected .choice-letter { color: var(--accent); }
+
+  .choice.correct {
+    border-color: var(--correct) !important;
+    background: rgba(0,230,118,.1) !important;
+  }
+  .choice.correct .choice-letter,
+  .choice.correct .choice-text { color: var(--correct); }
+
+  .choice.wrong {
+    border-color: var(--wrong) !important;
+    background: rgba(255,61,87,.1) !important;
+  }
+  .choice.wrong .choice-letter,
+  .choice.wrong .choice-text { color: var(--wrong); }
+
+  .choice.disabled { cursor: default; pointer-events: none; }
+  .choice.disabled:hover::after { opacity: 0; }
+  .choice.dimmed { opacity: .35; }
+
+  .choice-icon {
+    margin-left: auto;
+    font-size: 18px;
+    min-width: 20px;
+    position: relative; z-index: 1;
+  }
+
+  /* FEEDBACK */
+  .feedback-box {
+    margin-top: 24px;
+    padding: 20px 24px;
+    border-left: 4px solid var(--correct);
+    background: rgba(0,230,118,.06);
+    animation: fadeUp .3s ease;
+    display: none;
+  }
+
+  .feedback-box.show { display: block; }
+  .feedback-box.wrong { border-left-color: var(--wrong); background: rgba(255,61,87,.06); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--correct);
+  }
+  .feedback-box.wrong .feedback-title { color: var(--wrong); }
+
+  .feedback-text { font-size: 14px; line-height: 1.6; color: var(--muted); }
+
+  /* NEXT BTN */
+  .btn-next {
+    display: none;
+    margin-top: 28px;
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 14px 36px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all .2s;
+  }
+  .btn-next:hover { background: var(--accent); color: var(--bg); }
+  .btn-next.show { display: inline-block; animation: fadeUp .3s ease; }
+
+  /* SECTION HEADER */
+  .section-header {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* ── RESULTS ── */
+  #results {
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  .result-card {
+    max-width: 760px;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 60px 48px;
+    text-align: center;
+    position: relative;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,.08), transparent 60%);
+    pointer-events: none;
+  }
+
+  .result-grade {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 120px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .result-message {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .result-sub {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 48px;
+    line-height: 1.6;
+  }
+
+  .result-bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 48px;
+    text-align: left;
+  }
+
+  .rbar-item { background: var(--surface); border: 1px solid var(--border); padding: 20px 24px; }
+  .rbar-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .rbar-val { font-family: 'Bebas Neue', cursive; font-size: 40px; }
+  .rbar-val.green { color: var(--correct); }
+  .rbar-val.red { color: var(--wrong); }
+  .rbar-val.blue { color: var(--accent); }
+  .rbar-val.gold { color: var(--gold); }
+
+  .btn-retry {
+    background: transparent;
+    border: 1.5px solid var(--muted);
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 14px 36px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all .2s;
+    margin-right: 16px;
+  }
+  .btn-retry:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-review {
+    background: var(--accent2);
+    border: none;
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 14px 36px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all .2s;
+  }
+  .btn-review:hover { opacity: .85; }
+
+  /* ANSWER KEY */
+  #answer-key {
+    display: none;
+    position: relative; z-index: 1;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+  }
+  #answer-key.show { display: block; }
+
+  .ak-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    letter-spacing: 4px;
+    color: var(--text);
+    margin: 60px 0 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ak-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--border);
+  }
+  .ak-item.ak-correct { border-left-color: var(--correct); }
+  .ak-item.ak-wrong   { border-left-color: var(--wrong); }
+
+  .ak-q-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .ak-q-text { font-size: 15px; color: var(--text); margin-bottom: 16px; line-height: 1.5; }
+  .ak-answer-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ak-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 4px 12px; letter-spacing: 1px; }
+  .ak-badge.your  { background: rgba(255,61,87,.15); color: var(--wrong); border: 1px solid var(--wrong); }
+  .ak-badge.right { background: rgba(0,230,118,.15); color: var(--correct); border: 1px solid var(--correct); }
+  .ak-badge.ok    { background: rgba(0,230,118,.15); color: var(--correct); border: 1px solid var(--correct); }
+  .ak-explanation { font-size: 13px; color: var(--muted); line-height: 1.65; padding-top: 12px; border-top: 1px solid var(--border); }
+
+  /* UTILITY */
+  @media (max-width: 600px) {
+    .q-card { padding: 24px 20px; }
+    .result-bars { grid-template-columns: 1fr; }
+    .result-card { padding: 40px 24px; }
+    .topbar { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ INTRO ═══════════════════════════════════ -->
+<div id="intro" class="screen active">
+  <div class="badge">Mevzuat Sınavı · EHK 5809</div>
+  <div class="hero-title">ELEKTRONİK<br>HABERLEŞME<br>KANUNU</div>
+  <div class="hero-sub">5809 Sayılı Kanun Yetkinlik Testi</div>
+
+  <div class="intro-stats">
+    <div class="stat-box">
+      <span class="stat-num">22</span>
+      <span class="stat-label">Soru</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num">6</span>
+      <span class="stat-label">Soru Tipi</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num">~35</span>
+      <span class="stat-label">Dakika</span>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startQuiz()">
+    ▶ SINAVI BAŞLAT
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════ QUIZ ════════════════════════════════════ -->
+<div id="quiz" class="screen">
+  <div class="topbar">
+    <div class="q-counter">SORU <span id="qNum">1</span>/22</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:5%"></div>
+    </div>
+    <div class="score-pill" id="scorePill">PUAN: 0 / 0</div>
+  </div>
+
+  <div class="q-container">
+    <div class="section-header" id="qSection">KESİM I · GENEL HÜKÜMLER</div>
+    <div class="q-type-tag" id="qTypeTag">TEK DOĞRU CEVAP</div>
+
+    <div class="q-card" id="qCard">
+      <div class="q-number" id="qBigNum">01</div>
+      <div class="q-text" id="qText"></div>
+      <div class="choices" id="choicesWrap"></div>
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div class="feedback-text" id="feedbackText"></div>
+      </div>
+    </div>
+
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">
+      SONRAKİ SORU →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ RESULTS ══════════════════════════════════ -->
+<div id="results" class="screen">
+  <div class="result-card">
+    <div class="result-grade" id="resultGrade">0%</div>
+    <div class="result-label">Başarı Oranı</div>
+    <div class="result-message" id="resultMessage"></div>
+    <div class="result-sub" id="resultSub"></div>
+
+    <div class="result-bars">
+      <div class="rbar-item">
+        <div class="rbar-label">Doğru Cevap</div>
+        <div class="rbar-val green" id="rCorrect">0</div>
+      </div>
+      <div class="rbar-item">
+        <div class="rbar-label">Yanlış Cevap</div>
+        <div class="rbar-val red" id="rWrong">0</div>
+      </div>
+      <div class="rbar-item">
+        <div class="rbar-label">Toplam Soru</div>
+        <div class="rbar-val blue">22</div>
+      </div>
+      <div class="rbar-item">
+        <div class="rbar-label">Net Puan (100 üzerinden)</div>
+        <div class="rbar-val gold" id="rNet">0</div>
+      </div>
+    </div>
+
+    <button class="btn-retry" onclick="resetQuiz()">↺ TEKRAR ÇÖZ</button>
+    <button class="btn-review" onclick="showAnswerKey()">CEVAP ANAHTARI →</button>
+  </div>
+
+  <div id="answer-key">
+    <div class="ak-title">CEVAP ANAHTARI &amp; ÇÖZÜM AÇIKLAMALARI</div>
+    <div id="akContent"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ DATA ════════════════════════════════════ -->
+<script>
+const QUESTIONS = [
+  /* ─────── 1 ─────── */
+  {
+    id: 1,
+    section: "II. KISIM · ŞEBEKE ÜSTÜ HİZMET YAPTIRIM MEKANİZMASI",
+    type: "ANALİTİK / SÜREÇ SIRASI",
+    text: "Kurum, düzenlemelerde öngörülen yükümlülükleri yerine getirmeyen veya yetkilendirilmeksizin hizmet sunan bir şebeke üstü hizmet sağlayıcısına idari para cezası uygulamıştır. Bu ceza süresinde ödenmemiştir. Kanun'a göre Kurum'un internet trafiği bant genişliğini daraltabilmesi veya erişimi engelleyebilmesi için <strong>aşağıdaki koşulların hangisi doğru şekilde sıralanmıştır?</strong>",
+    choices: [
+      "İdari para cezasının uygulanması tek başına yeterlidir; bant daraltma kararı anında verilebilir",
+      "Ceza ödenmediği takdirde Kurum derhal, herhangi bir ek süre vermeksizin bant daraltabilir",
+      "Ceza süresinde ödenmez VE Kurum'un bildiriminden itibaren altı ay içinde yükümlülükler yerine getirilmez ya da yetkilendirme alınmazsa bant daraltma veya erişim engelleme kararı verilebilir",
+      "Ceza ödenmediği takdirde 30 gün içinde yükümlülükler yerine getirilmezse bant daraltılabilir",
+      "Bant daraltma kararı ancak mahkeme kararıyla mümkündür; Kurum tek başına bu kararı veremez"
+    ],
+    correct: 2,
+    explanation: "Kanun m.60/17'ye göre iki aşamalı bir koşul öngörülmüştür: (1) önce m.60/16 uyarınca idari para cezası uygulanmalıdır; (2) bu ceza süresinde ödenmez VE Kurum'un bildiriminden itibaren altı ay içinde yükümlülükler yerine getirilmez ya da yetkilendirme alınmazsa — ancak bu iki koşul birlikte gerçekleştiğinde — Kurum internet trafiği bant genişliğinin %95'ine kadar daraltılmasına veya erişimin engellenmesine karar verebilir. Yani ceza kesilmesi tek başına yeterli değildir; ek olarak 6 aylık sürenin de geçmesi gerekir."
+  },
+
+  /* ─────── 2 ─────── */
+  {
+    id: 2,
+    section: "I. KISIM · KAPSAM VE İSTİSNALAR",
+    type: "OLUMSUZ KÖKLÜ (Hangisi YAPAMAZ?)",
+    text: "Aşağıdaki kurumlardan hangisi, <strong>kendi elektronik haberleşme cihaz, sistem ve şebekeleri bakımından</strong> Kanun'un 36. ve 39. maddeler <strong>hariç</strong> tüm hükümlerinden muaf değildir?",
+    choices: [
+      "Türk Silahlı Kuvvetleri",
+      "Millî İstihbarat Teşkilatı Müsteşarlığı",
+      "Emniyet Genel Müdürlüğü",
+      "Rekabet Kurumu",
+      "Jandarma Genel Komutanlığı"
+    ],
+    correct: 3,
+    explanation: "Kanun'un 2. maddesinin 3. fıkrasında; TSK, Jandarma Genel Komutanlığı, Sahil Güvenlik Komutanlığı, Dışişleri Bakanlığı, Telekomünikasyon İletişim Başkanlığı, MİT ve Emniyet Genel Müdürlüğü'nün kendi şebeke ve cihazları hakkında (36. ve 39. maddeler hariç) Kanun hükümlerinin uygulanmayacağı düzenlenmiştir. Rekabet Kurumu bu muafiyet kapsamında sayılmamıştır."
+  },
+
+  /* ─────── 3 ─────── */
+  {
+    id: 3,
+    section: "II. KISIM · NUMARA TAŞINABİLİRLİĞİ (m.32)",
+    type: "ÇOKLU BİRLEŞİK (I–II–III–IV)",
+    text: "İşletmeci numara taşınabilirliğine ilişkin aşağıdaki yargılardan hangileri <strong>doğrudur?</strong><br><br><em>I. İşletmeciler, numara taşınabilirliği kapsamında şebekelerinde yapacakları düzenlemelerden kaynaklanan gider kalemleri için Kurum'dan hak talebinde bulunamaz.<br>II. Numara taşınabilirliği dolayısıyla aboneye doğrudan yansıyabilecek ücretler, abonelerin bu hizmeti almalarını engelleyici nitelikte olmamalıdır.<br>III. Ortak referans veri tabanı yalnızca Kurum tarafından kurulup işletilebilir; işletmeciler bu sistemi kuramaz.<br>IV. İşletmecilerin numara taşınabilirliği kapsamında birbirlerine uygulayacağı ücretler, erişim tarifeleri hükmüne (m.20) tabidir.</em>",
+    choices: [
+      "Yalnızca I ve II",
+      "Yalnızca II ve IV",
+      "I, II ve IV",
+      "I, III ve IV",
+      "I, II, III ve IV"
+    ],
+    correct: 2,
+    explanation: "I, II ve IV doğrudur. III. yargı yanlıştır: Kanun m.32/2'ye göre ortak referans veri tabanı ve benzeri sistemler Kurum'ca veya talep eden işletmeciler tarafından Kurum düzenlemeleri çerçevesinde kurulup/işletilebilir; ayrıca bu sistemler Kurum'un belirleyeceği usul ve esaslar çerçevesinde yükümlü işletmecilerce veya üçüncü bir tarafça da kurulup işletilebilir. Dolayısıyla bu münhasıran Kurum'a ait bir yetki değildir."
+  },
+
+  /* ─────── 4 ─────── */
+  {
+    id: 4,
+    section: "I. KISIM · İLKELER",
+    type: "ÇOKLU BİRLEŞİK (I–II–III)",
+    text: "Kanun'un 4. maddesinde belirtilen ilkelerle ilgili aşağıdaki yargılardan hangileri <strong>doğrudur?</strong><br><br><em>I. Elektronik haberleşme hizmetlerinde tariflerin serbestçe belirlenmesi esas olmakla birlikte mevzuatta veya yetkilendirmelerde açıkça belirlenen durumlar istisnadır.<br>II. İnsan sağlığı, can ve mal güvenliği açısından asgarî uluslararası normların dikkate alınması gerekir.<br>III. Millî güvenlik ile kamu düzeni gerekleri diğer ilkelere göre her durumda önceliklidir.</em>",
+    choices: [
+      "Yalnızca I",
+      "Yalnızca II",
+      "I ve II",
+      "II ve III",
+      "I, II ve III"
+    ],
+    correct: 2,
+    explanation: "I. ve II. yargılar doğrudur. III. yargı ise yanıltıcıdır; Kanun 'millî güvenlik ile kamu düzeni gereklerine ve acil durum ihtiyaçlarına öncelik verilmesi' ilkesini (ğ bendi) düzenlemiştir; ancak bu, her durumda mutlak üstünlük anlamına gelecek şekilde formüle edilmemiş olup diğer ilkelerle birlikte uygulanmaktadır."
+  },
+
+  /* ─────── 5 ─────── */
+  {
+    id: 5,
+    section: "II. KISIM · YETKİLENDİRME",
+    type: "NİCEL ANALİZ",
+    text: "Kullanım hakkının süresiyle ilgili olarak aşağıdakilerden hangisi <strong>doğrudur?</strong>",
+    choices: [
+      "Kullanım hakları en fazla 10 yıl için verilebilir",
+      "Kullanım hakları en fazla 15 yıl için verilebilir",
+      "Kullanım hakları en fazla 20 yıl için verilebilir",
+      "Kullanım hakları en fazla 25 yıl için verilebilir",
+      "Kullanım hakları için herhangi bir azami süre öngörülmemiştir"
+    ],
+    correct: 3,
+    explanation: "Kanun'un 9. maddesinin 8. fıkrası; 'kullanım haklarının süresi, yirmibeş yıldan fazla olmamak üzere belirlenir' hükmünü içermektedir. Azami süre 25 yıldır."
+  },
+
+  /* ─────── 6 ─────── */
+  {
+    id: 6,
+    section: "II. KISIM · YETKİLENDİRME – ŞEBEKE ÜSTÜ HİZMET",
+    type: "TEK DOĞRU CEVAP",
+    text: "2022 yılında yapılan değişiklikle Kanun'a eklenen şebeke üstü hizmet sağlayıcılara ilişkin aşağıdaki ifadelerden hangisi <strong>doğrudur?</strong>",
+    choices: [
+      "Şebeke üstü hizmet sağlayıcılar Türkiye'de sadece anonim şirket kurarak faaliyette bulunabilir",
+      "Şebeke üstü hizmet sağlayıcılar Türkiye'de tam yetkili temsilci açmaksızın hizmet sunabilir",
+      "Şebeke üstü hizmet sağlayıcılar, faaliyetlerini Türkiye'de kurdukları anonim şirket ya da limited şirket statüsündeki tam yetkili temsilcileri vasıtasıyla yetkilendirme çerçevesinde yürütür",
+      "Şebeke üstü hizmet sağlayıcılar işletmeci olarak kabul edilemez; bunlara ayrı bir statü uygulanır",
+      "Kurum, şebeke üstü hizmet sağlayıcıların internet trafiğini hiçbir koşulda kısıtlayamaz"
+    ],
+    correct: 2,
+    explanation: "Kanun m.9/14'e göre şebeke üstü hizmet sağlayıcılar faaliyetlerini Türkiye'de kurdukları anonim şirket ya da limited şirket statüsündeki tam yetkili temsilcileri vasıtasıyla Kurumca yapılacak yetkilendirme çerçevesinde yürütür. Yükümlülüklere uymayan ya da yetkilendirilmeksizin hizmet sunan şebeke üstü hizmet sağlayıcıların internet trafiği bant genişliği daraltılabilir veya erişim engellenebilir (m.60/17)."
+  },
+
+  /* ─────── 7 ─────── */
+  {
+    id: 7,
+    section: "II. KISIM · YETKİLENDİRME ÜCRETİ",
+    type: "NİCEL ANALİZ",
+    text: "İdarî ücret hesaplamasına ilişkin aşağıdaki ifadelerden hangisi <strong>doğrudur?</strong>",
+    choices: [
+      "İşletmecinin bir önceki yıl net satışlarının binde onunu geçemez",
+      "İşletmecinin bir önceki yıl net satışlarının binde beşini geçemez; yıllık asgari tutar 10.000 TL'den az olamaz",
+      "İşletmecinin bir önceki yıl net satışlarının yüzde birini geçemez",
+      "İşletmecinin bir önceki yıl net satışlarının binde beşini geçemez; yıllık asgari tutar ise belirlenmemiştir",
+      "Her yıl Cumhurbaşkanı tarafından doğrudan belirlenir"
+    ],
+    correct: 1,
+    explanation: "Kanun'un 11. maddesinin 2. fıkrasına göre idarî ücret, işletmecinin bir önceki yıl net satışlarının binde beşini geçemez. 2017 yılında eklenen hükümle yıllık alınan idarî ücret 10.000 TL alt sınırının altında olamaz; bu alt sınır her yıl yeniden değerleme oranında artırılır."
+  },
+
+  /* ─────── 8 ─────── */
+  {
+    id: 8,
+    section: "II. KISIM · ERİŞİM VE ARABAĞLANTI",
+    type: "ÇOKLU BİRLEŞİK (I–II–III–IV)",
+    text: "Erişim anlaşmalarına ilişkin aşağıdaki yargılardan hangileri <strong>doğrudur?</strong><br><br><em>I. Erişim anlaşmaları taraflarca serbestçe müzakere edilerek imzalanır.<br>II. Erişim talebinden itibaren azami iki ay içinde anlaşma sağlanamazsa Kurum devreye girebilir.<br>III. Erişim anlaşmaları ticari sırlar dahil tamamen alenidir.<br>IV. Kurum, uzlaştırma sürecinde anlaşmazlık konusu hükümleri belirlenen istisnai haller hariç iki ay içinde belirlemeye yetkilidir.</em>",
+    choices: [
+      "I ve II",
+      "I, II ve IV",
+      "I, III ve IV",
+      "II, III ve IV",
+      "I, II, III ve IV"
+    ],
+    correct: 1,
+    explanation: "I, II ve IV doğrudur. III yanlıştır: Kanun m.18/4'e göre erişim anlaşmaları 'ticarî sırlar dışında' alenidir. Ticari sırlar aleniyet kapsamı dışındadır."
+  },
+
+  /* ─────── 9 ─────── */
+  {
+    id: 9,
+    section: "II. KISIM · GEÇİŞ HAKKI",
+    type: "TEK DOĞRU CEVAP",
+    text: "Kamu kurum ve kuruluşlarının geçiş hakkı talebine ilişkin başvuruları kaç gün içinde sonuçlandırması gerekir?",
+    choices: [
+      "30 gün",
+      "45 gün",
+      "60 gün",
+      "90 gün",
+      "Kanun'da süre belirlenmemiştir"
+    ],
+    correct: 2,
+    explanation: "Kanun'un 23. maddesinin 2. fıkrasına göre kamu kurum ve kuruluşları kendilerine yapılan geçiş hakkı talebini içeren başvuruları öncelikli olarak ve gecikmeye mahal vermeden değerlendirir ve altmış (60) gün içinde sonuçlandırır."
+  },
+
+  /* ─────── 10 ─────── */
+  {
+    id: 10,
+    section: "II. KISIM · GEÇİŞ HAKKI",
+    type: "TEK DOĞRU CEVAP",
+    text: "Geçiş hakkını kullanan bir işletmeci, geçiş hakkı sağlayıcısının geçiş hakkı kullanımı dışında uğradığı zararları en geç kaç ay içinde karşılamak zorundadır?",
+    choices: [
+      "Derhal (zaman sınırı yoktur)",
+      "1 ay",
+      "2 ay",
+      "3 ay",
+      "6 ay"
+    ],
+    correct: 1,
+    explanation: "Kanun'un 28. maddesinin 3. fıkrasına göre geçiş hakkı kullanan işletmeciler, geçiş hakkı sağlayıcısının uğradığı zararları 'en geç bir ay içerisinde' karşılamak zorundadır."
+  },
+
+  /* ─────── 11 ─────── */
+  {
+    id: 11,
+    section: "II. KISIM · NUMARALANDIRMA",
+    type: "OLUMSUZ KÖKLÜ (Hangisi YAPILAMAZ?)",
+    text: "Elektronik haberleşme hizmetlerinde haczedilmezliğe ilişkin aşağıdaki ifadelerden hangisi <strong>doğrudur?</strong>",
+    choices: [
+      "Abone veya kullanıcılara tahsis edilen frekans ve numara kullanımı ile internet alan adları gibi intifa ve kullanım hakları haczedilebilir",
+      "Genel güvenlik ve asayişe yönelik haberleşmelerden Kurum'un belirlediği kapsama girenler herhangi bir nedenle kesintiye uğratılamaz",
+      "Elektronik haberleşme alt yapısına mahkeme kararı olmaksızın Kurum tek başına müdahale kararı verebilir",
+      "İşletmecilerin yetkilendirmeleri, yalnızca borç ödenmemesi durumunda haczedilebilir",
+      "Kamu yararı kararı bulunmaksızın elektronik haberleşme alt yapısına müdahale edilebilir"
+    ],
+    correct: 1,
+    explanation: "Kanun m.34'e göre; (1) abone/kullanıcılara tahsis edilen frekans, numara, hat, internet alan adı gibi kullanım hakları ile işletmecilerin yetkilendirmeleri hiçbir şekilde haczedilemez; (2) Kurum'un belirlediği kapsamdaki genel güvenlik/asayiş haberleşmeleri herhangi bir sebeple kesintiye uğratılamaz; (3) elektronik haberleşme alt yapısına mahkeme kararı veya Kurum/Bakanlık/yetkili mercilerin kararı olmaksızın müdahale edilemez."
+  },
+
+  /* ─────── 12 ─────── */
+  {
+    id: 12,
+    section: "III. KISIM · SPEKTRUM YÖNETİMİ",
+    type: "TEK DOĞRU CEVAP",
+    text: "Telsiz haberleşme sistemleri üzerinden kriptolu haberleşme yapmaya aşağıdaki kurumlardan hangisi <strong>yetkili değildir?</strong>",
+    choices: [
+      "Türk Silahlı Kuvvetleri",
+      "Millî İstihbarat Teşkilatı",
+      "Dışişleri Bakanlığı",
+      "Hazine ve Maliye Bakanlığı",
+      "Emniyet Genel Müdürlüğü"
+    ],
+    correct: 3,
+    explanation: "Kanun'un 39. maddesine göre telsiz haberleşme sistemleri üzerinden kriptolu haberleşme yapmaya; TSK, Jandarma Genel Komutanlığı ve Sahil Güvenlik Komutanlığı, MİT, Emniyet Genel Müdürlüğü ve Dışişleri Bakanlığı yetkilidir. Hazine ve Maliye Bakanlığı bu listede yer almamaktadır."
+  },
+
+  /* ─────── 13 ─────── */
+  {
+    id: 13,
+    section: "III. KISIM · TELSİZ",
+    type: "NİCEL ANALİZ",
+    text: "Yetkilendirmeye tabi bulunmayan telsiz kurma ve kullanma izinleri <strong>en fazla kaç yıl</strong> için verilir?",
+    choices: [
+      "1 yıl",
+      "2 yıl",
+      "3 yıl",
+      "5 yıl",
+      "10 yıl"
+    ],
+    correct: 3,
+    explanation: "Kanun'un 37. maddesinin 2. fıkrasına göre yetkilendirmeye tabi bulunmayan telsiz kurma ve kullanma izinleri en fazla beş yıl için verilir. Süresi içinde yenilenmeyen izinlerde tahsis edilen frekanslar iptal edilir."
+  },
+
+  /* ─────── 14 ─────── */
+  {
+    id: 14,
+    section: "IV. KISIM · TÜKETİCİ HAKLARI",
+    type: "TEK DOĞRU CEVAP",
+    text: "Abonelik sözleşmesi koşullarında işletmeci tarafından değişiklik yapılacak olması durumunda, işletmecinin aboneleri en az ne kadar süre önce bilgilendirmesi zorunludur?",
+    choices: [
+      "15 gün",
+      "1 ay",
+      "2 ay",
+      "3 ay",
+      "Kanun'da süre belirlenmemiş; Kurum belirler"
+    ],
+    correct: 1,
+    explanation: "Kanun m.50/4'e göre işletmeciler, sözleşmede yapılacak değişiklikler yürürlüğe girmeden en az bir ay önce abonelerini bilgilendirmekle ve abone tarafından kabul edilmemesi halinde tazminatsız fesih haklarının bulunduğunu bildirmekle yükümlüdürler."
+  },
+
+  /* ─────── 15 ─────── */
+  {
+    id: 15,
+    section: "IV. KISIM · TÜKETİCİ HAKLARI – KİŞİSEL VERİLER",
+    type: "ÇOKLU BİRLEŞİK (I–II–III)",
+    text: "Kanun m.51 kapsamında kişisel veri işleme ve saklama sürelerine ilişkin aşağıdaki yargılardan hangileri <strong>doğrudur?</strong><br><br><em>I. Kişisel verilere erişimlere ilişkin işlem kayıtları iki yıl saklanır.<br>II. Abonelerin rızalarını gösteren kayıtlar asgari olarak abonelik süresince saklanır.<br>III. Trafik ve konum verileri ilgili kişilerin açık rızası olmaksızın hiçbir koşulda yurt dışına aktarılamaz.</em>",
+    choices: [
+      "Yalnızca I",
+      "Yalnızca III",
+      "I ve II",
+      "II ve III",
+      "I, II ve III"
+    ],
+    correct: 2,
+    explanation: "I ve II doğrudur. III. yargı mutlak kural gibi sunulduğu için yanıltıcıdır; Kanun m.51/8'e göre acil yardım çağrıları ile afet ve acil durum hallerinde abonelerin açık rızası aranmaksızın konum verileri işlenebilir. Ayrıca m.51/9'a göre şikayet incelemesi ve denetim kapsamında da işleme yapılabilir."
+  },
+
+  /* ─────── 16 ─────── */
+  {
+    id: 16,
+    section: "IV. KISIM · KİŞİSEL VERİLER",
+    type: "EN UYGUN CEVAP",
+    text: "Kanun m.51/10'a göre kişisel verilerin saklanma sürelerine ilişkin aşağıdaki ifadelerden hangisi <strong>en doğru</strong> şekilde ifade edilmiştir?",
+    choices: [
+      "Tüm kişisel veriler, haberleşmenin yapıldığı tarihten itibaren 6 ay saklanır",
+      "Veri kategorileri ve haberleşme tarihinden itibaren 1 yıldan az ve 2 yıldan fazla olmamak üzere saklama süreleri yönetmelikle belirlenir",
+      "Tüm kişisel veriler sınırsız süre saklanabilir",
+      "Kişisel veriler abonelik süresince saklanır, abonelik sona erince derhal silinir",
+      "Saklama süresi Kurul kararıyla belirlenir; yönetmelik çıkarılmaz"
+    ],
+    correct: 1,
+    explanation: "Kanun m.51/10'a göre 'veri kategorileri ile haberleşmenin yapıldığı tarihten itibaren bir yıldan az ve iki yıldan fazla olmamak üzere verilerin saklanma süreleri yönetmelikle belirlenir.'"
+  },
+
+  /* ─────── 17 ─────── */
+  {
+    id: 17,
+    section: "VI. KISIM · DENETİM VE YAPTIRIMLAR",
+    type: "NİCEL ANALİZ",
+    text: "Kurum'un işletmecilere uygulayabileceği idarî para cezası üst sınırı ile ilgili hangi ifade doğrudur?",
+    choices: [
+      "Bir önceki takvim yılındaki net satışlarının yüzde birine kadar",
+      "Bir önceki takvim yılındaki net satışlarının yüzde ikisine kadar",
+      "Bir önceki takvim yılındaki net satışlarının yüzde üçüne kadar",
+      "Bir önceki takvim yılındaki net satışlarının yüzde beşine kadar",
+      "1.000 ile 10.000.000 TL arasında sabit oranlı ceza"
+    ],
+    correct: 2,
+    explanation: "Kanun m.60/1'e göre Kurum; işletmecilere bir önceki takvim yılındaki net satışlarının yüzde üçüne kadar idarî para cezası uygulayabilir. Faaliyete yeni başlamış işletmeciler içinse ayrıca 1.000 TL ile 1.000.000 TL arasında ceza uygulanabilir (m.60/2)."
+  },
+
+  /* ─────── 18 ─────── */
+  {
+    id: 18,
+    section: "VI. KISIM · YAPTIRIMLAR – ELEKTRONİK KİMLİK",
+    type: "EŞLEŞTIRME / ANALİTİK",
+    text: "Kanun m.57/3'e göre Kurum'un MCKS'sinde kayıtlı iken son sinyal alınmasından itibaren kesintisiz ne kadar süre elektronik haberleşme şebekelerinden hizmet almayan cihazların elektronik kimlik bilgileri kayıtlı olmaktan çıkarılır?",
+    choices: [
+      "6 ay",
+      "1 yıl",
+      "3 yıl",
+      "5 yıl",
+      "7 yıl"
+    ],
+    correct: 1,
+    explanation: "2022 yılında yapılan değişiklik (7423 s. Kanun) ile Kanun m.57/3'te yer alan 'kesintisiz yedi yıl' ibaresi 'son sinyal alınmasından itibaren kesintisiz bir yıl' olarak değiştirilmiştir. Bu suretle kaydı silinen cihazlar son kullanıcılarına ait bir hat ile kullanıldığında başka bir işleme gerek kalmaksızın tekrar kayıtlı hale getirilir."
+  },
+
+  /* ─────── 19 ─────── */
+  {
+    id: 19,
+    section: "VII. KISIM · CEZAİ HÜKÜMLER",
+    type: "OLUMSUZ KÖKLÜ (Hangisi YANLIŞ?)",
+    text: "Kanun m.63'te yer alan cezai hükümlere ilişkin aşağıdaki ifadelerden hangisi <strong>yanlıştır?</strong>",
+    choices: [
+      "Kuruma bildirimde bulunmaksızın elektronik haberleşme hizmeti verenlere bin günden on bin güne kadar adli para cezası verilebilir",
+      "Kullanım hakkı olmadan elektronik haberleşme hizmeti verenlere altı aya kadar hapis ve beş bin günden on beş bin güne kadar adli para cezası verilebilir",
+      "Bu suçların örgütsel faaliyet çerçevesinde işlenmesi halinde cezalar iki katı oranında artırılır",
+      "Yetki belgesi olmaksızın ölçüm ve denetim hizmeti verenlere beş bin güne kadar adli para cezası verilebilir",
+      "İzinsiz telsiz kurma ve kullanma halinde ikibin güne kadar adlî para cezası uygulanır"
+    ],
+    correct: 2,
+    explanation: "Kanun m.63/11'e göre bu maddede tanımlanan suçların bir örgütün faaliyeti çerçevesinde işlenmesi halinde verilecek cezalar 'yarısı oranında' artırılır, iki kat değil. Şık C'de 'iki katı' denildiği için bu şık yanlıştır."
+  },
+
+  /* ─────── 20 ─────── */
+  {
+    id: 20,
+    section: "VI. KISIM · ÖZEL YETKİ – ACİL ÖNLEMLER",
+    type: "EN UYGUN CEVAP",
+    text: "Kanun m.60/10'a göre Anayasa'nın 22. maddesinde sayılan sebeplerden birine bağlı olarak gecikmesinde sakınca bulunan hallerde Cumhurbaşkanlığı tarafından belirlenen tedbirlerin işletmecilere bildirilmesinin ardından bu kararın kaç saat içinde yerine getirilmesi ve sulh ceza hakiminin onayına sunulması gerekir?",
+    choices: [
+      "Kararın gereği 1 saat, hakim onayı 12 saat",
+      "Kararın gereği 2 saat, hakim onayı 24 saat içinde sunulur; hakim 48 saat içinde açıklar",
+      "Kararın gereği 4 saat, hakim onayı 48 saat",
+      "Kararın gereği anında, hakim onayı 72 saat",
+      "Kararın gereği 6 saat, hakim onayına gerek yoktur"
+    ],
+    correct: 1,
+    explanation: "Kanun m.60/10'a göre; (1) bu karar derhal ve kararın bildirilmesinden itibaren en geç iki saat içinde yerine getirilir; (2) bu karar yirmidört saat içinde sulh ceza hakiminin onayına sunulur; (3) hakim kararını kırksekiz saat içinde açıklar, aksi halde karar kendiliğinden kalkar."
+  },
+
+  /* ─────── 21 ─────── */
+  {
+    id: 21,
+    section: "VII. KISIM · CEZAİ HÜKÜMLER (m.63)",
+    type: "NİCEL ANALİZ / KARŞILAŞTIRMA",
+    text: "Kanun m.63 kapsamındaki cezai yaptırımlar bakımından aşağıdaki eşleştirmelerden hangisi <strong>doğrudur?</strong>",
+    choices: [
+      "Kuruma bildirimde bulunmaksızın elektronik haberleşme hizmeti vermek → 6 aya kadar hapis + 5.000–15.000 gün adli para cezası",
+      "Kullanım hakkı olmadan elektronik haberleşme hizmeti vermek → 1.000–10.000 gün adli para cezası (hapis yok)",
+      "Kuruma bildirimde bulunmaksızın hizmet vermek → 1.000–10.000 gün adli para cezası; kullanım hakkı olmadan hizmet vermek → 6 aya kadar hapis + 5.000–15.000 gün adli para cezası",
+      "Her iki ihlal için de yalnızca 500–5.000 gün adli para cezası öngörülmüştür",
+      "İki ihlal arasında herhangi bir fark yoktur; her ikisi de aynı cezai yaptırıma tabidir"
+    ],
+    correct: 2,
+    explanation: "Kanun m.63, bildirimsiz hizmet ile kullanım hakkısız hizmet için farklı yaptırımlar öngörmüştür. m.63/1: Kuruma bildirimde bulunmaksızın hizmet verenler → 1.000–10.000 gün adli para cezası (hapis yok). m.63/2: Kullanım hakkı olmadan hizmet verenler → 6 aya kadar HAPİS + 5.000–15.000 gün adli para cezası. Kullanım hakkısız faaliyet daha ağır yaptırıma tabidir."
+  },
+
+  /* ─────── 22 ─────── */
+  {
+    id: 22,
+    section: "VII. KISIM · CEZAİ HÜKÜMLER (m.63) – KİŞİSEL VERİ",
+    type: "OLUMSUZ KÖKLÜ (Hangisi YANLIŞ?)",
+    text: "Kanun m.63/3'e göre elektronik haberleşme hizmeti vermek üzere <strong>yetkilendirilmiş işletmecilerin personelinin</strong> özel hayata ve hayatın gizli alanına karşı suçlar işlemesi durumunda uygulanacak ceza rejimine ilişkin aşağıdakilerden hangisi <strong>yanlıştır?</strong>",
+    choices: [
+      "Haklarında TCK'nın ilgili bölümünde (İkinci Kitap, İkinci Kısım, Dokuzuncu Bölüm) öngörülen cezalara hükmolunur",
+      "TCK m.137'ye göre yapılacak artırım bir kat olarak uygulanır",
+      "Bu personel hakkında suçun işlendiği hizmet dalına göre otomatik olarak ağırlaştırılmış müebbet hapis cezası uygulanır",
+      "Söz konusu suçlar özel hayat ve hayatın gizli alanına karşı suç kategorisinde değerlendirilir",
+      "Bu hüküm yalnızca yetkilendirilmiş işletmecilerin personeline uygulanır; işletmecinin kendisine değil"
+    ],
+    correct: 2,
+    explanation: "Kanun m.63/3'e göre yetkilendirilmiş işletmecilerin personeli, TCK'nın özel hayat ve hayatın gizli alanına karşı suçları (İkinci Kitap, İkinci Kısım, Dokuzuncu Bölüm) işlerse haklarında bu bölümdeki cezalara hükmolunur; ancak TCK m.137'ye göre yapılacak artırım 'bir kat' olarak uygulanır. 'Otomatik ağırlaştırılmış müebbet hapis cezası' gibi bir hüküm Kanun'da yer almamaktadır; şık C yanlıştır."
+  }
+];
+
+// ── STATE ──
+let current = 0;
+let score = 0;
+let userAnswers = [];
+let answered = false;
+
+function startQuiz() {
+  document.getElementById('intro').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  answered = false;
+
+  // topbar
+  document.getElementById('qNum').textContent = current + 1;
+  document.getElementById('progressFill').style.width = ((current + 1) / QUESTIONS.length * 100) + '%';
+  document.getElementById('scorePill').textContent = `PUAN: ${score} / ${current}`;
+
+  // meta
+  document.getElementById('qSection').textContent = q.section;
+  document.getElementById('qTypeTag').textContent = q.type;
+  document.getElementById('qBigNum').textContent = String(current + 1).padStart(2, '0');
+  document.getElementById('qText').innerHTML = q.text;
+
+  // animate card
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  void card.offsetHeight;
+  card.style.animation = '';
+
+  // choices
+  const wrap = document.getElementById('choicesWrap');
+  wrap.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  q.choices.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = `
+      <span class="choice-letter">${letters[i]})</span>
+      <span class="choice-text">${c}</span>
+      <span class="choice-icon"></span>`;
+    div.onclick = () => selectAnswer(i);
+    wrap.appendChild(div);
+  });
+
+  // reset feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+  document.getElementById('btnNext').className = 'btn-next';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[current];
+  const choices = document.querySelectorAll('.choice');
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  const isCorrect = idx === q.correct;
+
+  userAnswers[current] = idx;
+  if (isCorrect) score++;
+
+  // apply styles
+  choices.forEach((el, i) => {
+    el.classList.add('disabled');
+    if (i === q.correct) {
+      el.classList.add('correct');
+      el.querySelector('.choice-icon').textContent = '✓';
+    } else if (i === idx && !isCorrect) {
+      el.classList.add('wrong');
+      el.querySelector('.choice-icon').textContent = '✗';
+    } else {
+      el.classList.add('dimmed');
+    }
+  });
+
+  // feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+  if (isCorrect) {
+    fb.className = 'feedback-box show';
+    document.getElementById('feedbackTitle').textContent = '✓ DOĞRU CEVAP';
+  } else {
+    fb.className = 'feedback-box show wrong';
+    document.getElementById('feedbackTitle').textContent = `✗ YANLIŞ — Doğru cevap: ${letters[q.correct]})`;
+  }
+  document.getElementById('feedbackText').textContent = q.explanation;
+
+  // next button
+  const btn = document.getElementById('btnNext');
+  btn.className = 'btn-next show';
+  btn.textContent = current < QUESTIONS.length - 1 ? 'SONRAKİ SORU →' : 'SONUÇLARI GÖR →';
+
+  document.getElementById('scorePill').textContent = `PUAN: ${score} / ${current + 1}`;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+
+  const pct = Math.round(score / QUESTIONS.length * 100);
+  document.getElementById('resultGrade').textContent = pct + '%';
+
+  let msg, sub;
+  if (pct >= 90) {
+    msg = 'Olağanüstü Performans!';
+    sub = 'EHK 5809 konusunda üst düzey bilgiye sahipsiniz.';
+  } else if (pct >= 75) {
+    msg = 'Çok İyi!';
+    sub = 'Kanuna hakimiyetiniz güçlü, birkaç konuyu pekiştirmeniz yeterli.';
+  } else if (pct >= 60) {
+    msg = 'Gelişime Açık';
+    sub = 'Temel bilgileriniz var; ayrıntıları çalışarak puanı yükseltebilirsiniz.';
+  } else {
+    msg = 'Yeniden Çalışmanız Önerilir';
+    sub = 'Kanunun önemli bölümlerini tekrar gözden geçirmeniz önerilir.';
+  }
+
+  document.getElementById('resultMessage').textContent = msg;
+  document.getElementById('resultSub').textContent = sub;
+  document.getElementById('rCorrect').textContent = score;
+  document.getElementById('rWrong').textContent = QUESTIONS.length - score;
+  document.getElementById('rNet').textContent = pct;
+}
+
+function showAnswerKey() {
+  const ak = document.getElementById('answer-key');
+  ak.classList.add('show');
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  let html = '';
+
+  QUESTIONS.forEach((q, i) => {
+    const userIdx = userAnswers[i];
+    const isCorrect = userIdx === q.correct;
+    html += `
+      <div class="ak-item ${isCorrect ? 'ak-correct' : 'ak-wrong'}">
+        <div class="ak-q-num">SORU ${i + 1} · ${q.section}</div>
+        <div class="ak-q-text">${q.text}</div>
+        <div class="ak-answer-row">
+          <span class="ak-badge ${isCorrect ? 'ok' : 'your'}">Cevabınız: ${userIdx !== undefined ? letters[userIdx] + ') ' + q.choices[userIdx] : 'Cevaplanmadı'}</span>
+          ${!isCorrect ? `<span class="ak-badge right">Doğru: ${letters[q.correct]}) ${q.choices[q.correct]}</span>` : ''}
+        </div>
+        <div class="ak-explanation">${q.explanation}</div>
+      </div>`;
+  });
+
+  document.getElementById('akContent').innerHTML = html;
+  ak.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  current = 0; score = 0; userAnswers = [];
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('answer-key').classList.remove('show');
+  document.getElementById('answer-key').style.display = '';
+  document.getElementById('intro').classList.add('active');
+  window.scrollTo({ top: 0 });
+}
+</script>
+</body>
+</html>
